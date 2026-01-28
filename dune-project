@@ -27,6 +27,8 @@
    (>= 0.9.8))
   (ppxlib
    (>= 0.3.1))
+  (caqti-type-calendar
+   (>= 2.0.0))
   (base
    (>= v0.11.1))
   (caqti
