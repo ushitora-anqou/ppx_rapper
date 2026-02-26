@@ -3,7 +3,6 @@ open Ppxlib
 module Buildef = Ast_builder.Default
 
 type input_kind = [ `Labelled_args | `Record ]
-
 type output_kind = [ `Tuple | `Record | `Function ]
 
 type extension_contents = {
@@ -39,8 +38,7 @@ let caqti_type_of_param ~loc Query.{ typ; opt; _ } =
         | "ptime" -> [%expr ptime]
         | "ptime_span" -> [%expr ptime_span]
         | other ->
-            raise (Error (Printf.sprintf "Base type '%s' not supported" other))
-        )
+            raise (Error (Printf.sprintf "Base type '%s' not supported" other)))
     | Some module_name, typ ->
         (* This case covers [cdate] and [ctime] *)
         Buildef.pexp_ident ~loc
@@ -83,7 +81,6 @@ let nth_loader_pat ~loc n =
   Buildef.(ppat_var ~loc (Loc.make ~loc s))
 
 let lident_of_param ~loc param = lident_of_string ~loc param.Query.name
-
 let var_of_param ~loc param = Loc.make ~loc param.Query.name
 
 (** Maps parsed parameters to ident expressions of their names *)
@@ -97,7 +94,8 @@ let ppat_of_param ~loc param = Buildef.ppat_var ~loc (var_of_param ~loc param)
 (** Maps parsed parameters to var patterns of their names *)
 let ppat_var_of_params ~loc params = List.map ~f:(ppat_of_param ~loc) params
 
-(** General function for producing ASTs for [(a, (b, (c, (d, e))))] as either expressions or patterns *)
+(** General function for producing ASTs for [(a, (b, (c, (d, e))))] as either
+    expressions or patterns *)
 let nested_tuple_thing zero_case mapper tuple_maker ~loc params =
   match List.length params with
   (* With current design, 0-tuple case should not occur. *)
@@ -276,16 +274,19 @@ let function_body_find ~loc = function_body_general ~loc find_body_factory
 
 (** Generates the function body for cases where it has involves a map
 
- * These are [find_opt] and [collect_list] (for [get_opt] and [get_many] statements). *)
+    * These are [find_opt] and [collect_list] (for [get_opt] and [get_many]
+    statements). *)
 let function_body_map ~loc map_expr =
   function_body_general ~loc (find_map_factory map_expr)
 
-(** Generates the function body for a [find_opt] function ([get_opt] statement) *)
+(** Generates the function body for a [find_opt] function ([get_opt] statement)
+*)
 let function_body_find_opt ~loc =
   function_body_map ~loc
     [%expr fun f x -> match x with Some x -> Some (f x) | None -> None]
 
-(** Generates the function body for a [collect_list] function ([get_many] statement) *)
+(** Generates the function body for a [collect_list] function ([get_many]
+    statement) *)
 let function_body_collect ~loc = function_body_map ~loc [%expr Stdlib.List.map]
 
 (** Generates code like [fun ~x ~y ~z -> Db.some_function query (x, (y, z))]. *)
@@ -314,8 +315,8 @@ let query_function ~loc ?(body_fn = fun x -> x) function_body_factory
         else
           let input_record_pattern = record_pattern ~loc deduped_in_params in
           [%expr
-            fun [%p input_record_pattern] (module Db : Rapper_helper.CONNECTION) ->
-              [%e body]]
+            fun [%p input_record_pattern]
+                (module Db : Rapper_helper.CONNECTION) -> [%e body]]
     | `Labelled_args ->
         if List.is_empty in_params then
           [%expr fun () (module Db : Rapper_helper.CONNECTION) -> [%e body]]
@@ -343,7 +344,7 @@ let query_function ~loc ?(body_fn = fun x -> x) function_body_factory
               (List.init (List.length groups) ~f:(fun n ->
                    nth_loader_pat ~loc n))
           in
-          [%expr fun [%p loaders] -> [%e without_loaders_parameter]] )
+          [%expr fun [%p loaders] -> [%e without_loaders_parameter]])
   | _ -> without_loaders_parameter
 
 let exec_function ~body_fn ~loc =

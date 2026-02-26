@@ -26,19 +26,19 @@ let list_group l ~break =
 let load_many (get_parent, parent_key) children_getters_and_setters data =
   data
   |> list_group ~break:(fun x y ->
-         parent_key (get_parent x) <> parent_key (get_parent y))
+      parent_key (get_parent x) <> parent_key (get_parent y))
   |> List.map (fun group ->
-         let parents, children =
-           ( List.map get_parent group,
-             List.map
-               (fun (getter, setter) -> (setter, List.map getter group))
-               children_getters_and_setters )
-         in
-         let parent = List.hd parents in
-         List.fold_left
-           (fun current_parent (setter, children) ->
-             setter current_parent children)
-           parent children)
+      let parents, children =
+        ( List.map get_parent group,
+          List.map
+            (fun (getter, setter) -> (setter, List.map getter group))
+            children_getters_and_setters )
+      in
+      let parent = List.hd parents in
+      List.fold_left
+        (fun current_parent (setter, children) ->
+          setter current_parent children)
+        parent children)
 
 module Internal = struct
   module Dynparam = struct

@@ -1,7 +1,5 @@
 type a = { username: string }
-
 type b = { id: int; username: string }
-
 type c = { id: int; username: string; email: string }
 
 let many_arg_execute =
@@ -188,7 +186,6 @@ let get_cards =
       {sql| SELECT @int{id}, @Nested.Suit{suit} FROM cards WHERE suit <> %Nested.Suit{suit} |sql}]
 
 type user = { user_id: int; name: string }
-
 type twoot = { twoot_id: int; content: string; likes: int }
 
 let get_multiple_record_out =

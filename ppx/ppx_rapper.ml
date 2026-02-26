@@ -2,7 +2,8 @@ open Base
 open Ppxlib
 module Buildef = Ast_builder.Default
 
-(** Handle 'record_in' etc. in [%rapper "SELECT * FROM USERS" record_in record_out] *)
+(** Handle 'record_in' etc. in
+    [%rapper "SELECT * FROM USERS" record_in record_out] *)
 let parse_args args =
   let allowed_args =
     [ "record_in"; "record_out"; "function_out"; "syntax_off" ]
@@ -42,7 +43,8 @@ let component_expressions ~loc parsed_query =
   let parsed_sql = Buildef.estring ~loc parsed_query.sql in
   (inputs_caqti_type, outputs_caqti_type, parsed_sql)
 
-(** Make a function [expand_get] to produce the expressions for [get_one], [get_opt] and [get_many], and a similar [expand_exec] for [execute] *)
+(** Make a function [expand_get] to produce the expressions for [get_one],
+    [get_opt] and [get_many], and a similar [expand_exec] for [execute] *)
 let make_expand_get_and_exec_expression ~loc parsed_query input_kind output_kind
     =
   let { Query.sql; in_params; out_params; list_params } = parsed_query in
@@ -120,8 +122,8 @@ let make_expand_get_and_exec_expression ~loc parsed_query input_kind output_kind
                   let sql = [%e sql_before] ^ patch ^ [%e sql_after] in
                   let open Rapper.Internal in
                   let (Dynparam.Pack
-                        ( packed_list_type,
-                          [%p Codegen.ppat_of_param ~loc list_param] )) =
+                         ( packed_list_type,
+                           [%p Codegen.ppat_of_param ~loc list_param] )) =
                     Stdlib.List.fold_left
                       (fun pack item ->
                         Dynparam.add
@@ -158,8 +160,8 @@ let make_expand_get_and_exec_expression ~loc parsed_query input_kind output_kind
           Ok
             (make_generic make_function
                [%expr
-                 [%e caqti_request_function_expr]
-                   ~oneshot:true ([%e caqti_input_type] [@ocaml.warning "-33"])
+                 [%e caqti_request_function_expr] ~oneshot:true
+                   ([%e caqti_input_type] [@ocaml.warning "-33"])
                    (Caqti_type.([%e outputs_caqti_type]) [@ocaml.warning "-33"])
                    sql])
         with Codegen.Error s -> Error s
@@ -170,8 +172,8 @@ let make_expand_get_and_exec_expression ~loc parsed_query input_kind output_kind
           Ok
             (make_generic make_function
                [%expr
-                 [%e caqti_request_function_expr]
-                   [%e caqti_input_type] (Caqti_type.unit) sql])
+                 [%e caqti_request_function_expr] [%e caqti_input_type]
+                   Caqti_type.unit sql])
         with Codegen.Error s -> Error s
       in
       (expand_get, expand_exec)
@@ -227,7 +229,7 @@ let make_expand_get_and_exec_expression ~loc parsed_query input_kind output_kind
                [%expr
                  [%e caqti_request_function_expr]
                    (Caqti_type.([%e inputs_caqti_type]) [@ocaml.warning "-33"])
-                   (Caqti_type.unit) [%e parsed_sql]])
+                   Caqti_type.unit [%e parsed_sql]])
         with Codegen.Error s -> Error s
       in
       (expand_get, expand_exec)
@@ -283,12 +285,17 @@ let expand_apply ~loc ~path:_ action query args =
                            Error
                              "function_out is not a valid argument for execute"
                        | `Tuple ->
-                           expand_exec [%expr Caqti_request.Infix.(->.)] Codegen.exec_function)
-                   | "get_one" -> expand_get [%expr Caqti_request.Infix.(->!)] Codegen.find_function
+                           expand_exec [%expr Caqti_request.Infix.( ->. )]
+                             Codegen.exec_function)
+                   | "get_one" ->
+                       expand_get [%expr Caqti_request.Infix.( ->! )]
+                         Codegen.find_function
                    | "get_opt" ->
-                       expand_get [%expr Caqti_request.Infix.(->?)] Codegen.find_opt_function
+                       expand_get [%expr Caqti_request.Infix.( ->? )]
+                         Codegen.find_opt_function
                    | "get_many" ->
-                       expand_get [%expr Caqti_request.Infix.(->*)] Codegen.collect_list_function
+                       expand_get [%expr Caqti_request.Infix.( ->* )]
+                         Codegen.collect_list_function
                    | _ ->
                        Error
                          "Supported actions are execute, get_one, get_opt and \
@@ -310,7 +317,7 @@ let expand_let ~loc ~path vb_var action query args =
   in
   Ast.pstr_value ~loc Nonrecursive [ vb ]
 
-(** Captures [\[%rapper get_one "SELECT id FROM things WHERE condition"\]] *)
+(** Captures [[%rapper get_one "SELECT id FROM things WHERE condition"]] *)
 let apply_pattern () =
   let open Ast_pattern in
   let query_action = pexp_ident (lident __) in
@@ -322,14 +329,16 @@ let apply_pattern () =
   let arguments = query ^:: many arg in
   pexp_apply query_action arguments
 
-(** Captures [\[let%rapper get_thing = get_one "SELECT id FROM things WHERE condition"\]] *)
+(** Captures
+    [[let%rapper get_thing = get_one "SELECT id FROM things WHERE condition"]]
+*)
 let let_pattern () =
   let open Ast_pattern in
   pstr
     (pstr_value nonrecursive
-       (value_binding
-       ~constraint_:drop
-       ~pat:(ppat_var __) ~expr:(apply_pattern ()) ^:: nil)
+       (value_binding ~constraint_:drop ~pat:(ppat_var __)
+          ~expr:(apply_pattern ())
+       ^:: nil)
     ^:: nil)
 
 let name = "rapper"

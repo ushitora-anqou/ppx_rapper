@@ -1,8 +1,9 @@
 (ocamllex query)
 
 (library
-(name ppx_rapper)
-(public_name ppx_rapper)
-(kind ppx_rewriter)
-(libraries ppxlib pg_query base)
-(preprocess (pps ppxlib.metaquot)))
+ (name ppx_rapper)
+ (public_name ppx_rapper)
+ (kind ppx_rewriter)
+ (libraries ppxlib pg_query base)
+ (preprocess
+  (pps ppxlib.metaquot)))
