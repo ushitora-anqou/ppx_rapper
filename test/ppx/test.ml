@@ -11,6 +11,15 @@ let many_arg_execute =
       WHERE id = %int{id}
       |sql}]
 
+let many_arg_execute_with_affected_count =
+  [%rapper
+    execute_with_affected_count
+      {sql|
+      UPDATE users
+      SET (username, email, bio) = (%string{username}, %string{email}, %string?{bio})
+      WHERE id = %int{id}
+      |sql}]
+
 let single_arg_execute =
   [%rapper
     execute

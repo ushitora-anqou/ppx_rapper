@@ -275,7 +275,7 @@ let expand_apply ~loc ~path:_ action query args =
                    in
                    match action with
                    (* execute is special case because there is no output Caqti_type *)
-                   | "execute" -> (
+                   | "execute" | "execute_with_affected_count" -> (
                        match output_kind with
                        | `Record ->
                            Error
@@ -286,7 +286,9 @@ let expand_apply ~loc ~path:_ action query args =
                              "function_out is not a valid argument for execute"
                        | `Tuple ->
                            expand_exec [%expr Caqti_request.Infix.( ->. )]
-                             Codegen.exec_function)
+                             (match action with
+                             | "execute" -> Codegen.exec_function
+                             | _ -> Codegen.exec_with_affected_count))
                    | "get_one" ->
                        expand_get [%expr Caqti_request.Infix.( ->! )]
                          Codegen.find_function

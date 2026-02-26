@@ -350,6 +350,10 @@ let query_function ~loc ?(body_fn = fun x -> x) function_body_factory
 let exec_function ~body_fn ~loc =
   query_function ~loc ~body_fn function_body_exec [%expr Db.exec]
 
+let exec_with_affected_count ~body_fn ~loc =
+  query_function ~loc ~body_fn function_body_exec
+    [%expr Db.exec_with_affected_count]
+
 let find_function ~body_fn ~loc =
   query_function ~loc ~body_fn function_body_find [%expr Db.find]
 

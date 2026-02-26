@@ -17,6 +17,16 @@ let many_arg_execute =
     ((module Db)  : (module Rapper_helper.CONNECTION)) =
     Db.exec query (username, (email, (bio, id))) in
   wrapped
+let many_arg_execute_with_affected_count =
+  let query =
+    Caqti_request.Infix.(->.)
+      ((let open Caqti_type in t2 string (t2 string (t2 (option string) int)))
+      [@ocaml.warning "-33"]) Caqti_type.unit
+      "\n      UPDATE users\n      SET (username, email, bio) = (?, ?, ?)\n      WHERE id = ?\n      " in
+  let wrapped ~username ~email ~bio ~id
+    ((module Db)  : (module Rapper_helper.CONNECTION)) =
+    Db.exec_with_affected_count query (username, (email, (bio, id))) in
+  wrapped
 let single_arg_execute =
   let query =
     Caqti_request.Infix.(->.) ((let open Caqti_type in string)
